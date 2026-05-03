@@ -1,0 +1,6 @@
+[submodule "third_party/IsaacLab"]
+	path = third_party/IsaacLab
+	url = https://github.com/isaac-sim/IsaacLab.git
+[submodule "third_party/unitree_sim_isaaclab"]
+	path = third_party/unitree_sim_isaaclab
+	url = https://github.com/unitreerobotics/unitree_sim_isaaclab.git

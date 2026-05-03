@@ -5,14 +5,12 @@ import numpy as np
 from isaaclab.app import AppLauncher
 
 parser = argparse.ArgumentParser()
+AppLauncher.add_app_launcher_args(parser)
 parser.add_argument("--num_envs", type=int, default=1)
 parser.add_argument("--teleop", action="store_true")
 parser.add_argument("--teleop_zmq", action="store_true")
 parser.add_argument("--left_port", type=int, default=5555)
 parser.add_argument("--right_port", type=int, default=5556)
-parser.add_argument("--device", type=str, default="cuda:0")
-
-AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 app_launcher = AppLauncher(args)
 simulation_app = app_launcher.app
@@ -30,7 +28,11 @@ def run_standalone(env, device):
     step = 0
     while simulation_app.is_running():
         action = torch.zeros(env.num_envs, num_dof, device=device)
-        obs, _, _, _, _ = env.step(action)
+        step_out = env.step(action)
+        if len(step_out) == 2:
+            obs, _ = step_out
+        else:
+            obs, _, _, _, _ = step_out
         step += 1
 
         if step % 500 == 0:
@@ -55,14 +57,18 @@ def run_teleop_keyboard(env, device):
 
     while simulation_app.is_running():
         action = teleop.get_action()
-        obs, _, _, _, _ = env.step(action)
+        step_out = env.step(action)
+        if len(step_out) == 2:
+            obs, _ = step_out
+        else:
+            obs, _, _, _, _ = step_out
 
 
 def run_teleop_zmq(env, device, left_port, right_port):
     receiver = ZMQTeleopReceiver(left_port, right_port)
     obs, _ = env.reset()
 
-    num_dof_per_robot = 29
+    num_dof_per_robot = env.action_manager.total_action_dim // 2
     left_target = torch.zeros(num_dof_per_robot, device=device)
     right_target = torch.zeros(num_dof_per_robot, device=device)
 
@@ -71,14 +77,22 @@ def run_teleop_zmq(env, device, left_port, right_port):
     while simulation_app.is_running():
         left_joints, right_joints = receiver.receive()
 
-        if left_joints is not None and len(left_joints) == num_dof_per_robot:
-            left_target = torch.tensor(left_joints, device=device, dtype=torch.float32)
+        if left_joints is not None and len(left_joints) > 0:
+            left_tensor = torch.tensor(left_joints, device=device, dtype=torch.float32)
+            left_target = torch.zeros(num_dof_per_robot, device=device)
+            left_target[: min(num_dof_per_robot, left_tensor.numel())] = left_tensor[:num_dof_per_robot]
 
-        if right_joints is not None and len(right_joints) == num_dof_per_robot:
-            right_target = torch.tensor(right_joints, device=device, dtype=torch.float32)
+        if right_joints is not None and len(right_joints) > 0:
+            right_tensor = torch.tensor(right_joints, device=device, dtype=torch.float32)
+            right_target = torch.zeros(num_dof_per_robot, device=device)
+            right_target[: min(num_dof_per_robot, right_tensor.numel())] = right_tensor[:num_dof_per_robot]
 
         action = torch.cat([left_target, right_target]).unsqueeze(0)
-        obs, _, _, _, _ = env.step(action)
+        step_out = env.step(action)
+        if len(step_out) == 2:
+            obs, _ = step_out
+        else:
+            obs, _, _, _, _ = step_out
 
 
 def main():

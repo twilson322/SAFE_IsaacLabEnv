@@ -1,7 +1,7 @@
 import isaaclab.envs.mdp as mdp
+import isaaclab.sim as sim_utils
 from isaaclab.envs import ManagerBasedEnvCfg
 from isaaclab.managers import ObservationGroupCfg, ObservationTermCfg
-from isaaclab.managers import ActionTermCfg
 from isaaclab.managers import EventTermCfg, SceneEntityCfg
 from isaaclab.utils import configclass
 
@@ -10,16 +10,14 @@ from dual_g1_scene_cfg import DualG1SceneCfg
 
 @configclass
 class ActionsCfg:
-    joint_pos_left = ActionTermCfg(
-        class_type=mdp.JointPositionActionCfg,
+    joint_pos_left = mdp.JointPositionActionCfg(
         asset_name="robot_left",
         joint_names=[".*"],
         scale=1.0,
         use_default_offset=True,
     )
 
-    joint_pos_right = ActionTermCfg(
-        class_type=mdp.JointPositionActionCfg,
+    joint_pos_right = mdp.JointPositionActionCfg(
         asset_name="robot_right",
         joint_names=[".*"],
         scale=1.0,
@@ -134,4 +132,3 @@ class DualG1EnvCfg(ManagerBasedEnvCfg):
         self.episode_length_s = 30.0
 
 
-import isaaclab.sim as sim_utils

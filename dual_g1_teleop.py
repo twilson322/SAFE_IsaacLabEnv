@@ -9,20 +9,21 @@ class DualG1Teleop:
     def __init__(self, env, device="cuda:0"):
         self.env = env
         self.device = device
-        self.num_dof_per_robot = 29
+        total_action_dim = self.env.action_manager.total_action_dim
+        self.num_dof_per_robot = total_action_dim // 2
         self.action_scale = 0.05
 
         self.left_target = torch.zeros(self.num_dof_per_robot, device=device)
         self.right_target = torch.zeros(self.num_dof_per_robot, device=device)
 
         self.joint_groups = {
-            "left_arm": list(range(13, 20)),
-            "right_arm": list(range(20, 27)),
-            "left_hand": list(range(27, 29)) if self.num_dof_per_robot > 27 else [],
+            "left_arm": [i for i in range(13, 20) if i < self.num_dof_per_robot],
+            "right_arm": [i for i in range(20, 27) if i < self.num_dof_per_robot],
+            "left_hand": [i for i in range(27, 29) if i < self.num_dof_per_robot],
             "right_hand": [],
-            "waist": list(range(0, 3)),
-            "left_leg": list(range(3, 8)),
-            "right_leg": list(range(8, 13)),
+            "waist": [i for i in range(0, 3) if i < self.num_dof_per_robot],
+            "left_leg": [i for i in range(3, 8) if i < self.num_dof_per_robot],
+            "right_leg": [i for i in range(8, 13) if i < self.num_dof_per_robot],
         }
 
         self.active_group = "left_arm"
