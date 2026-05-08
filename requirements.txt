@@ -1,0 +1,5 @@
+# Runtime deps beyond what Isaac Lab installs.
+# Isaac Sim and Isaac Lab itself are installed separately; see README.
+
+pyzmq>=25.0          # ZMQ teleop transport (scripts/dual_g1_teleop.py:ZMQTeleopReceiver)
+numpy>=1.24          # buffer parsing for ZMQ messages
