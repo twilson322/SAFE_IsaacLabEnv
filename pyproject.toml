@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safe-isaaclab-env"
+version = "0.1.0"
+description = "Dual Unitree G1 fixed-base Isaac Lab env for XR teleoperation"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Tristan Wilson" },
+]
+dependencies = [
+    "pyzmq>=25.0",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4",
+]
+
+[project.urls]
+Repository = "https://github.com/twilson322/SAFE_IsaacLabEnv"
+
+[tool.setuptools.packages.find]
+include = ["configs*", "scripts*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = ["I"]
